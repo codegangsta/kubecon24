@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/LdDl/go-darknet"
-	"github.com/disintegration/imaging"
 	"github.com/nats-io/nats.go/micro"
 )
 
@@ -27,7 +26,7 @@ func detectionHandler(n *darknet.YOLONetwork) micro.Handler {
 		}
 
 		// Resize our image
-		src = imaging.Resize(src, 416, 416, imaging.Lanczos)
+		// src = imaging.Resize(src, 416, 416, imaging.Lanczos)
 		imgDarknet, err := darknet.Image2Float32(src)
 		if err != nil {
 			log.Println("Error processing image:", err)
