@@ -40,7 +40,7 @@ func main() {
 		GPUDeviceIndex:           0,
 		NetworkConfigurationFile: *configFile,
 		WeightsFile:              *weightsFile,
-		Threshold:                .25,
+		Threshold:                .85,
 	}
 	if err := n.Init(); err != nil {
 		printError(err)
@@ -58,42 +58,48 @@ func main() {
 		panic(err.Error())
 	}
 
+	//resize image to network size
+	src = imaging.Resize(src, 416, 416, imaging.Lanczos)
+
 	imgDarknet, err := darknet.Image2Float32(src)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	dr, err := n.Detect(imgDarknet)
-	if err != nil {
-		printError(err)
-		return
+	// loop 10 times to get average time
+	for i := 0; i < 10; i++ {
+		dr, err := n.Detect(imgDarknet)
+		if err != nil {
+			printError(err)
+			return
+		}
+
+		log.Println("Network-only time taken:", dr.NetworkOnlyTimeTaken)
+		log.Println("Overall time taken:", dr.OverallTimeTaken, len(dr.Detections))
+		for _, d := range dr.Detections {
+			for i := range d.ClassIDs {
+				bBox := d.BoundingBox
+				fmt.Printf("%s (%d): %.4f%% | start point: (%d,%d) | end point: (%d, %d)\n",
+					d.ClassNames[i], d.ClassIDs[i],
+					d.Probabilities[i],
+					bBox.StartPoint.X, bBox.StartPoint.Y,
+					bBox.EndPoint.X, bBox.EndPoint.Y,
+				)
+
+				// Uncomment code below if you want save cropped objects to files
+				// minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
+				// maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
+				// rect := image.Rect(round(minX), round(minY), round(maxX), round(maxY))
+				// err := saveToFile(src, rect, fmt.Sprintf("crop_%d.jpeg", i))
+				// if err != nil {
+				// 	fmt.Println(err)
+				// 	return
+				// }
+			}
+		}
+
 	}
 	imgDarknet.Close()
-
-	log.Println("Network-only time taken:", dr.NetworkOnlyTimeTaken)
-	log.Println("Overall time taken:", dr.OverallTimeTaken, len(dr.Detections))
-	for _, d := range dr.Detections {
-		for i := range d.ClassIDs {
-			bBox := d.BoundingBox
-			fmt.Printf("%s (%d): %.4f%% | start point: (%d,%d) | end point: (%d, %d)\n",
-				d.ClassNames[i], d.ClassIDs[i],
-				d.Probabilities[i],
-				bBox.StartPoint.X, bBox.StartPoint.Y,
-				bBox.EndPoint.X, bBox.EndPoint.Y,
-			)
-
-			// Uncomment code below if you want save cropped objects to files
-			// minX, minY := float64(bBox.StartPoint.X), float64(bBox.StartPoint.Y)
-			// maxX, maxY := float64(bBox.EndPoint.X), float64(bBox.EndPoint.Y)
-			// rect := image.Rect(round(minX), round(minY), round(maxX), round(maxY))
-			// err := saveToFile(src, rect, fmt.Sprintf("crop_%d.jpeg", i))
-			// if err != nil {
-			// 	fmt.Println(err)
-			// 	return
-			// }
-		}
-	}
-
 	n.Close()
 }
 
