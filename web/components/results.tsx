@@ -8,6 +8,9 @@ import DeviceDetector from "device-detector-js";
 import { isSubset } from "./util";
 import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import WebcamDialog from "./webcam-dialog";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const { decode } = JSONCodec<SurveyFormData>();
@@ -222,6 +225,7 @@ export default function Results({ nickname }: Props) {
               </div>
             </span>
             <div className="flex-grow flex-1"></div>
+            <WebcamDialog />
           </div>
         </CardHeader>
       </Card>
