@@ -75,7 +75,6 @@ export default function WebcamDialog({ observer }: Props) {
     }
 
     setDetections(data);
-    console.log(data);
   }, []);
 
   const performDetection = useCallback(async () => {
@@ -158,7 +157,7 @@ export default function WebcamDialog({ observer }: Props) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="md:max-w-3xl lg:max-w-5xl justify-center">
+      <DialogContent className="!min-w-[760px] md:max-w-3xl lg:max-w-5xl justify-center">
         <div className="relative">
           {observer ? (
             <img
@@ -206,18 +205,19 @@ export default function WebcamDialog({ observer }: Props) {
             ))}
           </div>
         </div>
-        <DialogFooter className="flex flex-row justify-center sm:justify-center">
-          <div></div>
-          {streaming ? (
-            <Button variant="destructive" onClick={() => stopStreaming()}>
-              <StopCircleIcon size={24} />
-            </Button>
-          ) : (
-            <Button onClick={() => setStreaming(true)}>
-              <Disc2Icon className="text-red-400" size={24} />
-            </Button>
-          )}
-        </DialogFooter>
+        {!observer && (
+          <DialogFooter className="flex flex-row justify-center sm:justify-center">
+            {streaming ? (
+              <Button variant="destructive" onClick={() => stopStreaming()}>
+                <StopCircleIcon size={24} />
+              </Button>
+            ) : (
+              <Button onClick={() => setStreaming(true)}>
+                <Disc2Icon className="text-red-400" size={24} />
+              </Button>
+            )}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -5,7 +5,7 @@ import { Events, JSONCodec, StringCodec, consumerOpts } from "nats.ws";
 import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import DeviceDetector from "device-detector-js";
-import { isSubset } from "./util";
+import { getItem, isSubset } from "./util";
 import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
 import WebcamDialog from "./webcam-dialog";
@@ -25,6 +25,7 @@ export default function Results({ nickname }: Props) {
   const { chart_color } = useNatsStore((state) => state.config);
   const router = useRouter();
   const pathname = usePathname();
+  const isAdmin = getItem("isAdmin") === "true";
 
   useEffect(() => {
     const { encode } = JSONCodec();
@@ -223,8 +224,7 @@ export default function Results({ nickname }: Props) {
               </div>
             </span>
             <div className="flex-grow flex-1"></div>
-            <WebcamDialog />
-            <WebcamDialog observer={true} />
+            {isAdmin ? <WebcamDialog /> : <WebcamDialog observer={true} />}
           </div>
         </CardHeader>
       </Card>
