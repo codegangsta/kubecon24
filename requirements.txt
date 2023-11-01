@@ -1,3 +1,0 @@
-nats-py
-opencv-python
-numpy
