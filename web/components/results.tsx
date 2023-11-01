@@ -8,8 +8,6 @@ import DeviceDetector from "device-detector-js";
 import { isSubset } from "./util";
 import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import WebcamDialog from "./webcam-dialog";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -204,7 +202,7 @@ export default function Results({ nickname }: Props) {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader className="p-3 md:p-6">
-          <div className="flex flex-row">
+          <div className="flex flex-row gap-3">
             <span className="font-medium font-mono flex flex-row gap-3">
               {status === Events.Reconnect && (
                 <div className="w-5 h-5 p-2">
@@ -226,6 +224,7 @@ export default function Results({ nickname }: Props) {
             </span>
             <div className="flex-grow flex-1"></div>
             <WebcamDialog />
+            <WebcamDialog observer={true} />
           </div>
         </CardHeader>
       </Card>

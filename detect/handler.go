@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"image/jpeg"
 	"log"
+	"strings"
 
 	"github.com/LdDl/go-darknet"
 	"github.com/nats-io/nats.go/micro"
@@ -17,7 +20,13 @@ func detectionHandler(n *darknet.YOLONetwork) micro.Handler {
 	return micro.HandlerFunc(func(req micro.Request) {
 		log.Println("Received Detection request")
 
-		buffer := bytes.NewBuffer(req.Data())
+		imageBytes, err := decodeDataURL(string(req.Data()))
+		if err != nil {
+			log.Println("Error decoding image:", err)
+			req.Error("400", "Error decoding image", nil)
+			return
+		}
+		buffer := bytes.NewBuffer(imageBytes)
 		src, err := jpeg.Decode(buffer)
 		if err != nil {
 			log.Println("Error decoding image:", err)
@@ -44,4 +53,15 @@ func detectionHandler(n *darknet.YOLONetwork) micro.Handler {
 
 		req.RespondJSON(dr)
 	})
+}
+
+func decodeDataURL(dataURL string) ([]byte, error) {
+	// Splitting the Data URL at the comma
+	dataParts := strings.SplitN(dataURL, ",", 2)
+	if len(dataParts) != 2 {
+		return nil, fmt.Errorf("invalid data URL")
+	}
+
+	// Decoding the base64 part
+	return base64.StdEncoding.DecodeString(dataParts[1])
 }

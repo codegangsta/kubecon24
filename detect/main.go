@@ -36,7 +36,7 @@ func main() {
 		GPUDeviceIndex:           0,
 		NetworkConfigurationFile: *configFile,
 		WeightsFile:              *weightsFile,
-		Threshold:                .85,
+		Threshold:                .4,
 	}
 	if err := n.Init(); err != nil {
 		printError(err)
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	fmt.Println("Connecting to nats-server...")
-	nc, err := nats.Connect("mac-studio.tail73cc5.ts.net:4222")
+	nc, err := nats.Connect("nats://connect.codegangsta.dev", nats.UserCredentials("user.creds"))
 	if err != nil {
 		log.Fatal(err)
 	}
