@@ -90,7 +90,7 @@ export default function WebcamDialog({ observer }: Props) {
 
         const resp = await connection
           .request("ai_detect", screenshotData, {
-            reply: "ai_detect_reply." + randomString,
+            reply: "ai_detect.reply." + randomString,
             noMux: true,
             timeout: 5000,
           })
@@ -122,7 +122,7 @@ export default function WebcamDialog({ observer }: Props) {
             SetImgSrc(sc.decode(msg.data));
           },
         });
-        const sub2 = connection.subscribe("ai_detect_reply.>", {
+        const sub2 = connection.subscribe("ai_detect.reply.>", {
           callback: (err, msg) => {
             if (err) {
               console.log(err);
