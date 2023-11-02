@@ -191,19 +191,6 @@ export default function Results({ nickname }: Props) {
         },
       });
 
-      service.addEndpoint("vote", {
-        queue: service.info().id,
-        subject: "qcon.vote",
-        metadata: {
-          description: "Navigate clients to the voting page",
-        },
-        handler: async (err, msg) => {
-          window.location.href =
-            "https://qconsf.com/presentation/oct2023/rethinking-connectivity-edge-scaling-fleets-low-powered-devices-using-natsio";
-          msg.respond("ok");
-        },
-      });
-
       service.addEndpoint("any_volunteers", {
         queue: service.info().id,
         subject: "qcon.any_volunteers",
@@ -212,6 +199,9 @@ export default function Results({ nickname }: Props) {
         },
         handler: async (err, msg) => {
           if (isAdmin) return;
+          const device = new DeviceDetector().parse(navigator.userAgent);
+          if (device.device?.type != "desktop") return;
+
           if (window.confirm("Would you like to share your webcam?")) {
             const { encode } = JSONCodec<Handoff>();
             const handoff = encode({
@@ -299,11 +289,7 @@ export default function Results({ nickname }: Props) {
             {isAdmin && !isSharing && (
               <Button onClick={stopHandoff}>Stop Handoff</Button>
             )}
-            {isSharing ? (
-              <WebcamDialog  />
-            ) : (
-              <WebcamDialog observer  />
-              )}
+            {isSharing ? <WebcamDialog /> : <WebcamDialog observer />}
           </div>
         </CardHeader>
       </Card>

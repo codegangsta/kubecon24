@@ -127,7 +127,7 @@ export default function Survey(props: Props) {
                   )}
                 />
               ))}
-              <Button type="submit">Get Started</Button>
+              <Button type="submit">Submit</Button>
             </form>
           </Form>
         </CardContent>
