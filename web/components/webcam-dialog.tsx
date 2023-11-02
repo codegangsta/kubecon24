@@ -194,7 +194,7 @@ export default function WebcamDialog({ observer }: Props) {
             />
           )}
           {detections && (
-            <span className="absolute bottom-0 right-0 text-purple-500 bg-purple-200/50">
+            <span className="absolute bottom-0 right-0 bg-purple-500 text-white font-mono text-sm">
               {detections.ModelName} t={detections.Threshold.toFixed(2)}
             </span>
           )}
