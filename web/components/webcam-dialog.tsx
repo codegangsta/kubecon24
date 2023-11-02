@@ -10,6 +10,8 @@ import Webcam from "react-webcam";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNatsStore } from "./use-nats-store";
 import { JSONCodec, StringCodec } from "nats.ws";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
 
 // TODO:Get this working for other webcam types
 const videoConstraints = {
@@ -228,15 +230,15 @@ export default function WebcamDialog({ observer }: Props) {
         </div>
         {!observer && (
           <DialogFooter className="flex flex-row justify-center sm:justify-center">
-            {streaming ? (
-              <Button variant="destructive" onClick={() => stopStreaming()}>
-                <StopCircleIcon size={24} />
-              </Button>
-            ) : (
-              <Button onClick={() => startStreaming()}>
-                <Disc2Icon className="text-red-400" size={24} />
-              </Button>
-            )}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="object-detection"
+                onCheckedChange={(checked) =>
+                  checked ? startStreaming() : stopStreaming()
+                }
+              />
+              <Label htmlFor="object-detection">Object Detection</Label>
+            </div>
           </DialogFooter>
         )}
       </DialogContent>
