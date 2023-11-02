@@ -13,16 +13,18 @@ import (
 )
 
 type DetectionResponse struct {
-	Detections []*darknet.Detection
+	*darknet.DetectionResult
+	ModelName string
+	Threshold float64
 }
 
-func detectionHandler(n *darknet.YOLONetwork) micro.Handler {
+func detectionHandler() micro.Handler {
 	return micro.HandlerFunc(func(req micro.Request) {
-		log.Println("Received Detection request")
+		Log("Received Detection request")
 
 		imageBytes, err := decodeDataURL(string(req.Data()))
 		if err != nil {
-			log.Println("Error decoding image:", err)
+			Log("Error decoding image:", err.Error())
 			req.Error("400", "Error decoding image", nil)
 			return
 		}
@@ -38,20 +40,22 @@ func detectionHandler(n *darknet.YOLONetwork) micro.Handler {
 		// src = imaging.Resize(src, 416, 416, imaging.Lanczos)
 		imgDarknet, err := darknet.Image2Float32(src)
 		if err != nil {
-			log.Println("Error processing image:", err)
+			Log("Error processing image:", err.Error())
 			req.Error("500", "Error processing image", nil)
 			return
 		}
 		defer imgDarknet.Close()
 
-		dr, err := n.Detect(imgDarknet)
+		networkLock.RLock()
+		defer networkLock.RUnlock()
+		dr, err := network.Detect(imgDarknet)
 		if err != nil {
-			log.Println("Error performing detection:", err)
+			Log("Error performing detection:", err.Error())
 			req.Error("500", "Error processing image", nil)
 			return
 		}
 
-		req.RespondJSON(dr)
+		req.RespondJSON(&DetectionResponse{dr, modelName, threshold})
 	})
 }
 

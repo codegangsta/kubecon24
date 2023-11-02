@@ -35,6 +35,8 @@ interface Detection {
 }
 
 interface DetectionResponse {
+  ModelName: string;
+  Threshold: number;
   NetworkOnlyTimeTaken: number;
   OverallTimeTaken: number;
   Detections: Detection[];
@@ -52,19 +54,15 @@ export default function WebcamDialog({ observer }: Props) {
   const [streaming, setStreaming] = useState<boolean>(false);
 
   const applyDetections = useCallback((data: DetectionResponse) => {
-    // sort by probability
+    // sort by class name
     data.Detections.sort((a, b) => {
-      const aProb = a.Probabilities.reduce((a, b) => a + b, 0);
-      const bProb = b.Probabilities.reduce((a, b) => a + b, 0);
-      return bProb - aProb;
+      const aName = a.ClassNames.join("");
+      const bName = b.ClassNames.join("");
+      return aName.localeCompare(bName);
     });
 
-    //dedupe based on class names
     data.Detections = data.Detections.reduce((acc, curr) => {
-      const found = acc.find((d) => {
-        return d.ClassNames.join("") === curr.ClassNames.join("");
-      });
-      if (!found && curr.ClassNames.length > 0) {
+      if (curr.ClassNames.length > 0) {
         acc.push(curr);
       }
       return acc;
@@ -88,16 +86,27 @@ export default function WebcamDialog({ observer }: Props) {
         // generate a short random alphanumeric string
         const randomString = Math.random().toString(36).substring(2, 15);
 
-        const resp = await connection.request("ai_detect", screenshotData, {
-          reply: "ai_detect_reply." + randomString,
-          noMux: true,
-          timeout: 5000,
-        });
-        const data = jc.decode(resp.data);
-        applyDetections(data);
+        const resp = await connection
+          .request("ai_detect", screenshotData, {
+            reply: "ai_detect_reply." + randomString,
+            noMux: true,
+            timeout: 5000,
+          })
+          .catch((err) => {
+            console.log(err);
+            stopStreaming();
+          });
+        if (resp) {
+          const data = jc.decode(resp.data);
+          applyDetections(data);
+        }
       }
     }
   }, [connection, webcamRef, applyDetections]);
+
+  useEffect(() => {
+    setDetections(undefined);
+  }, [observer]);
 
   useEffect(() => {
     if (observer) {
@@ -140,6 +149,13 @@ export default function WebcamDialog({ observer }: Props) {
     applyDetections,
   ]);
 
+  const startStreaming = () => {
+    setStreaming(true);
+    setTimeout(() => {
+      performDetection();
+    }, 200);
+  };
+
   const stopStreaming = () => {
     setStreaming(false);
     setTimeout(() => {
@@ -177,23 +193,28 @@ export default function WebcamDialog({ observer }: Props) {
               videoConstraints={videoConstraints}
             />
           )}
+          {detections && (
+            <span className="absolute bottom-0 right-0 text-purple-500 bg-purple-200/50">
+              {detections.ModelName} t={detections.Threshold.toFixed(2)}
+            </span>
+          )}
           <div
             className="absolute inset-0"
             style={{ width: width, height: height }}
           >
             {detections?.Detections.map((detection, i) => (
               <div
-                key={detection.ClassNames.join("")}
-                className="absolute border-4 rounded border-purple-500 transition-all text-sm font-bold text-purple-500 whitespace-nowrap"
+                key={detection.ClassNames.join("") + i}
+                className="absolute border-2 rounded border-purple-500 transition-all text-sm font-bold text-purple-500 whitespace-nowrap"
                 style={{
                   top: detection.StartPoint.Y,
                   left: detection.StartPoint.X,
                   width: detection.EndPoint.X - detection.StartPoint.X,
                   height: detection.EndPoint.Y - detection.StartPoint.Y,
-                  opacity: detection.Probabilities[0] / 100,
+                  opacity: Math.max(detection.Probabilities[0] / 100, 0.25),
                 }}
               >
-                <div className="absolute -top-6 overflow-visible flex flex-row gap-1">
+                <div className="absolute -top-5 -left-0.5 overflow-visible flex flex-row gap-1 bg-purple-500 text-xs font-mono text-white py-0.5 px-1">
                   <span>{detection.ClassNames.join(" ")}</span>
                   <span>
                     {detection.Probabilities.map(
@@ -212,7 +233,7 @@ export default function WebcamDialog({ observer }: Props) {
                 <StopCircleIcon size={24} />
               </Button>
             ) : (
-              <Button onClick={() => setStreaming(true)}>
+              <Button onClick={() => startStreaming()}>
                 <Disc2Icon className="text-red-400" size={24} />
               </Button>
             )}

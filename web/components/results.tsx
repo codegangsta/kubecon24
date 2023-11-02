@@ -9,9 +9,15 @@ import { getItem, isSubset } from "./util";
 import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
 import WebcamDialog from "./webcam-dialog";
+import { Button } from "./ui/button";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const { decode } = JSONCodec<SurveyFormData>();
+
+interface Handoff {
+  id: string;
+  name: string;
+}
 
 interface Props {
   nickname: string;
@@ -26,6 +32,29 @@ export default function Results({ nickname }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const isAdmin = getItem("isAdmin") === "true";
+  const [isSharing, setIsSharing] = useState<boolean>(isAdmin);
+  const [serviceId, setServiceId] = useState<string>("");
+
+  const startHandoff = useCallback(async () => {
+    if (!connection) return;
+
+    const resp = await connection.request("qcon.any_volunteers", undefined, {
+      timeout: 10000,
+    });
+    connection.publish("qcon.handoff", resp.data);
+    setIsSharing(false);
+  }, [connection]);
+
+  const stopHandoff = useCallback(async () => {
+    if (!connection) return;
+    const { encode } = JSONCodec<Handoff>();
+
+    connection.publish(
+      "qcon.handoff",
+      encode({ id: serviceId, name: nickname })
+    );
+    setIsSharing(true);
+  }, [connection, serviceId, nickname]);
 
   useEffect(() => {
     const { encode } = JSONCodec();
@@ -105,6 +134,7 @@ export default function Results({ nickname }: Props) {
           });
         },
       });
+      setServiceId(service.info().id);
 
       service.addEndpoint("device_info", {
         queue: service.info().id,
@@ -174,6 +204,45 @@ export default function Results({ nickname }: Props) {
         },
       });
 
+      service.addEndpoint("any_volunteers", {
+        queue: service.info().id,
+        subject: "qcon.any_volunteers",
+        metadata: {
+          description: "Requests a handoff to another webcam",
+        },
+        handler: async (err, msg) => {
+          if (isAdmin) return;
+          if (window.confirm("Would you like to share your webcam?")) {
+            const { encode } = JSONCodec<Handoff>();
+            const handoff = encode({
+              id: service.info().id,
+              name: nickname,
+            });
+            msg.respond(handoff);
+          }
+        },
+      });
+
+      service.addEndpoint("handoff", {
+        queue: service.info().id,
+        subject: "qcon.handoff",
+        metadata: {
+          description: "Navigate clients to the voting page",
+        },
+        handler: async (err, msg) => {
+          const { decode } = JSONCodec<Handoff>();
+          const handoff = decode(msg.data);
+          if (handoff.id == service.info().id) {
+            setIsSharing(true);
+          } else {
+            setIsSharing(false);
+          }
+          log(
+            `Handing off the camera to ${handoff.name}. It's your time to shine!`
+          );
+        },
+      });
+
       const info = service.info();
       log(`Initialized "${info.name}" service v${info.version}`);
 
@@ -224,7 +293,17 @@ export default function Results({ nickname }: Props) {
               </div>
             </span>
             <div className="flex-grow flex-1"></div>
-            {isAdmin ? <WebcamDialog /> : <WebcamDialog observer={true} />}
+            {isAdmin && isSharing && (
+              <Button onClick={startHandoff}>Handoff</Button>
+            )}
+            {isAdmin && !isSharing && (
+              <Button onClick={stopHandoff}>Stop Handoff</Button>
+            )}
+            {isSharing ? (
+              <WebcamDialog  />
+            ) : (
+              <WebcamDialog observer  />
+              )}
           </div>
         </CardHeader>
       </Card>
