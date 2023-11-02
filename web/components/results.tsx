@@ -38,10 +38,10 @@ export default function Results({ nickname }: Props) {
   const startHandoff = useCallback(async () => {
     if (!connection) return;
 
-    const resp = await connection.request("qcon.any_volunteers", undefined, {
+    const resp = await connection.request("kubecon.any_volunteers", undefined, {
       timeout: 10000,
     });
-    connection.publish("qcon.handoff", resp.data);
+    connection.publish("kubecon.handoff", resp.data);
     setIsSharing(false);
   }, [connection]);
 
@@ -50,7 +50,7 @@ export default function Results({ nickname }: Props) {
     const { encode } = JSONCodec<Handoff>();
 
     connection.publish(
-      "qcon.handoff",
+      "kubecon.handoff",
       encode({ id: serviceId, name: nickname })
     );
     setIsSharing(true);
@@ -125,8 +125,8 @@ export default function Results({ nickname }: Props) {
 
     const service = (async () => {
       const service = await connection.services.add({
-        name: "qcon",
-        description: "QCon Attendee Service",
+        name: "kubecon",
+        description: "Kubecon Attendee Service",
         version: "0.0.1",
         statsHandler: (stats) => {
           return Promise.resolve({
@@ -138,7 +138,7 @@ export default function Results({ nickname }: Props) {
 
       service.addEndpoint("device_info", {
         queue: service.info().id,
-        subject: "qcon.device_info",
+        subject: "kubecon.device_info",
         metadata: {
           description: "Returns device info with optional filtering.",
         },
@@ -159,7 +159,7 @@ export default function Results({ nickname }: Props) {
 
       service.addEndpoint("advertise", {
         queue: service.info().id,
-        subject: "qcon.advertise",
+        subject: "kubecon.advertise",
         metadata: {
           description: "Advertise a new server for clients to connect to.",
         },
@@ -179,7 +179,7 @@ export default function Results({ nickname }: Props) {
       });
 
       service.addEndpoint("nickname", {
-        subject: "qcon.nickname",
+        subject: "kubecon.nickname",
         metadata: {
           description: "Returns the name of the attendee.",
         },
@@ -193,7 +193,7 @@ export default function Results({ nickname }: Props) {
 
       service.addEndpoint("any_volunteers", {
         queue: service.info().id,
-        subject: "qcon.any_volunteers",
+        subject: "kubecon.any_volunteers",
         metadata: {
           description: "Requests a handoff to another webcam",
         },
@@ -215,7 +215,7 @@ export default function Results({ nickname }: Props) {
 
       service.addEndpoint("handoff", {
         queue: service.info().id,
-        subject: "qcon.handoff",
+        subject: "kubecon.handoff",
         metadata: {
           description: "Navigate clients to the voting page",
         },
