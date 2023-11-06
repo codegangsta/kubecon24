@@ -55,6 +55,7 @@ func detectionHandler() micro.Handler {
 			return
 		}
 
+		Log(fmt.Sprintf("Found %d objects in %s", len(dr.Detections), dr.OverallTimeTaken))
 		req.RespondJSON(&DetectionResponse{dr, modelName, threshold})
 	})
 }
