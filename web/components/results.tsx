@@ -10,7 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
 import WebcamDialog from "./webcam-dialog";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent } from "./ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./ui/dialog";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const { decode } = JSONCodec<SurveyFormData>();
@@ -124,8 +124,12 @@ export default function Results({ nickname }: Props) {
       return;
     }
 
-    const sub = connection.subscribe("kubecon.quickdraw.reply", {
-      callback: (err, msg) => setQuickDrawReply(undefined),
+    const sub = connection.subscribe("quickdraw_reply.>", {
+      callback: (err, msg) => {
+        const { decode } = StringCodec();
+        log(`${decode(msg.data)} is the winner!`);
+        setQuickDrawReply(undefined);
+      },
     });
 
     return () => {
@@ -374,8 +378,28 @@ export default function Results({ nickname }: Props) {
           ))}
         </CardContent>
       </Card>
-      <Dialog open={!!quickDrawReply}>
-        <DialogContent>Hello world</DialogContent>
+      <Dialog
+        open={!!quickDrawReply}
+        onOpenChange={(open) => {
+          if (!open) setQuickDrawReply(undefined);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <span className="text-2xl text-center">
+              Who wants to win a tshirt?
+            </span>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row lg:justify-center mt-6">
+            <Button
+              onClick={() =>
+                quickDrawReply && connection?.publish(quickDrawReply, nickname)
+              }
+            >
+              Pick Me!
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
