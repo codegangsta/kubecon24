@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Terminal } from "lucide-react";
 import WebcamDialog from "./webcam-dialog";
 import { Button } from "./ui/button";
+import { Dialog, DialogContent } from "./ui/dialog";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const { decode } = JSONCodec<SurveyFormData>();
@@ -34,6 +35,7 @@ export default function Results({ nickname }: Props) {
   const isAdmin = getItem("isAdmin") === "true";
   const [isSharing, setIsSharing] = useState<boolean>(isAdmin);
   const [serviceId, setServiceId] = useState<string>("");
+  const [quickDrawReply, setQuickDrawReply] = useState<string | undefined>();
 
   const startHandoff = useCallback(async () => {
     if (!connection) return;
@@ -121,6 +123,20 @@ export default function Results({ nickname }: Props) {
     if (!connection) {
       return;
     }
+
+    const sub = connection.subscribe("kubecon.quickdraw.reply", {
+      callback: (err, msg) => setQuickDrawReply(undefined),
+    });
+
+    return () => {
+      sub.unsubscribe();
+    };
+  }, [connection]);
+
+  useEffect(() => {
+    if (!connection) {
+      return;
+    }
     const { encode } = JSONCodec();
 
     const service = (async () => {
@@ -188,6 +204,18 @@ export default function Results({ nickname }: Props) {
           const { encode } = StringCodec();
           msg.respond(encode(nickname));
           log(`\tSending response: ${nickname}`);
+        },
+      });
+
+      service.addEndpoint("quickdraw", {
+        queue: service.info().id,
+        subject: "kubecon.quickdraw",
+        metadata: {
+          description: "Pops a dialog for attendees to reply to.",
+        },
+        handler: async (err, msg) => {
+          log(`Received request on ${msg.subject}`);
+          setQuickDrawReply(msg.reply);
         },
       });
 
@@ -346,6 +374,9 @@ export default function Results({ nickname }: Props) {
           ))}
         </CardContent>
       </Card>
+      <Dialog open={!!quickDrawReply}>
+        <DialogContent>Hello world</DialogContent>
+      </Dialog>
     </div>
   );
 }
