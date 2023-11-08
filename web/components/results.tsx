@@ -325,7 +325,7 @@ export default function Results({ nickname }: Props) {
           </div>
         </CardHeader>
       </Card>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {SurveyQuestions.map((question) => (
           <Card key={question.id}>
             <CardHeader className="p-3 md:p-6">
@@ -347,12 +347,35 @@ export default function Results({ nickname }: Props) {
                   stroke: {
                     show: false,
                   },
+                  tooltip: {
+                    enabled: false,
+                  },
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        size: "75%",
+                        labels: {
+                          show: true,
+                          total: {
+                            show: true,
+                            color: "#ffffff",
+                          },
+                          name: {
+                            color: "#ffffff",
+                          },
+                          value: {
+                            color: "#ffffff",
+                          },
+                        },
+                      },
+                    },
+                  },
                   theme: {
                     monochrome: {
                       enabled: true,
                       color: chart_color,
                       shadeTo: "dark",
-                      shadeIntensity: 0.65,
+                      shadeIntensity: 0.85,
                     },
                   },
                 }}

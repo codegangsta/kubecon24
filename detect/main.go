@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,18 +20,26 @@ var modelName = "yolov4-tiny"
 var threshold = float64(0.5)
 var network *darknet.YOLONetwork
 var networkLock = &sync.RWMutex{}
+var url = "nats://connect.ngs.global"
 
 func main() {
 	ctx := context.Background()
 	fmt.Println("Connecting to nats-server...")
 	var err error
-	// nc, err = nats.Connect("nats://connect.ngs.global", nats.UserCredentials("user.creds"), nats.Name("orin_nano"))
-	nc, err = nats.Connect("192.168.3.1:4222", nats.Name("orin_nano"))
+
+	// check if we have an arg passed in
+	if len(os.Args) > 1 {
+		url = os.Args[1]
+		nc, err = nats.Connect(url, nats.Name("orin_nano"))
+	} else {
+		nc, err = nats.Connect(url, nats.UserCredentials("user.creds"), nats.Name("orin_nano"))
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Log("Connected to nats-server")
+	Log(fmt.Sprintf("Connected to %q", nc.ConnectedUrl()))
 	js, err := jetstream.New(nc)
 	if err != nil {
 		Fatal("Error creating jetstream", err.Error(), "exiting.")

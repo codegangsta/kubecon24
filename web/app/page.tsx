@@ -21,9 +21,9 @@ const bearerJwt =
   "eyJ0eXAiOiJKV1QiLCJhbGciOiJlZDI1NTE5LW5rZXkifQ.eyJqdGkiOiIzVk8ySlRTTjZWSU5HU0pHTFdZS0xYWVJGM0xLUkFJTUZDREs3TEFNNjZUUVQ3T1RCNURRIiwiaWF0IjoxNjk5MzEwNzI3LCJpc3MiOiJBQ0MyTllZRFFSWkFBTk5WNkNHNDdYUklBWkxZMlhSTjVNMkpWUkZWUFFZQ083WUU1SU9aSFlSSCIsIm5hbWUiOiJ3ZWIiLCJzdWIiOiJVRFBDVDNIWE5TS0tHNVlUSjRWNVo2UFFRVkJDWEFITVpWVkJURTdBRjdVT1JWVFhZRllKQjJQSSIsIm5hdHMiOnsicHViIjp7fSwic3ViIjp7fSwic3VicyI6LTEsImRhdGEiOi0xLCJwYXlsb2FkIjoxMDQ4NTc2LCJiZWFyZXJfdG9rZW4iOnRydWUsImlzc3Vlcl9hY2NvdW50IjoiQUFEN1RLUkxMTktEV0VCVkxERjRLQVlEU1gzUU9QREQ0TzRDNk40WVlSTTNESk5XTTZMV1dUSkMiLCJ0eXBlIjoidXNlciIsInZlcnNpb24iOjJ9fQ.m0f43YZONR5e-lNQycK8UYzBjYX0XnHktFSTMWug_8WxyrGPamiDRVazvJOnEajtofIq6vgHx4ECvuONkeDRBg";
 
 const connectOpts = {
-  //servers: "ws://localhost:8080",
-  servers: "wss://connect.ngs.global:443",
-  authenticator: jwtAuthenticator(bearerJwt),
+  servers: "ws://localhost:8080",
+  // servers: "wss://connect.ngs.global:443",
+  // authenticator: jwtAuthenticator(bearerJwt),
 };
 
 export default function Home() {
