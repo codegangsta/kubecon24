@@ -26,9 +26,11 @@ export enum UseCase {
   EventStreaming = "Event streaming in NATS",
   Microservices = "NATS for microservice architectures",
   IoT = "NATS for IoT, Edge and Fleet management",
+  AI = "NATS for AI and Machine Learning",
 }
 
 export enum Industry {
+  Technology = "Technology",
   Finance = "Finance",
   Retail = "Retail",
   Healthcare = "Healthcare",

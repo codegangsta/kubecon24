@@ -6,3 +6,8 @@ remote_run::
 remote_sync::
 	rsync -avz --exclude-from '../.gitignore' --delete -e ssh ./ jeremy@orin-nano:/home/jeremy/code/kubecon23
 
+setup::
+	sudo jetson_clocks && sudo nvpmodel -m 0
+
+leaf:
+	nats-server -c leaf.conf

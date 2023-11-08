@@ -24,7 +24,8 @@ func main() {
 	ctx := context.Background()
 	fmt.Println("Connecting to nats-server...")
 	var err error
-	nc, err = nats.Connect("nats://connect.ngs.global", nats.UserCredentials("user.creds"), nats.Name("orin_nano"))
+	// nc, err = nats.Connect("nats://connect.ngs.global", nats.UserCredentials("user.creds"), nats.Name("orin_nano"))
+	nc, err = nats.Connect("192.168.3.1:4222", nats.Name("orin_nano"))
 	if err != nil {
 		log.Fatal(err)
 	}
