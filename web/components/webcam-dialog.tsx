@@ -52,7 +52,7 @@ export default function WebcamDialog({ observer }: Props) {
   const { connection } = useNatsStore();
   const webcamRef = useRef<Webcam>(null);
   const [detections, setDetections] = useState<DetectionResponse>();
-  const [imgSrc, SetImgSrc] = useState<string>();
+  const [imgSrc, setImgSrc] = useState<string>();
   const [streaming, setStreaming] = useState<boolean>(false);
 
   const applyDetections = useCallback((data: DetectionResponse) => {
@@ -71,7 +71,7 @@ export default function WebcamDialog({ observer }: Props) {
     }, [] as Detection[]);
 
     if (data.Detections.length == 0) {
-      data.Detections = detections?.Detections ?? [];
+      return;
     }
 
     setDetections(data);
@@ -119,7 +119,7 @@ export default function WebcamDialog({ observer }: Props) {
               console.log(err);
               return;
             }
-            SetImgSrc(sc.decode(msg.data));
+            setImgSrc(sc.decode(msg.data));
           },
         });
         const sub2 = connection.subscribe("ai_detect.reply.>", {
@@ -140,7 +140,7 @@ export default function WebcamDialog({ observer }: Props) {
       }
       return;
     } else if (streaming) {
-      performDetection();
+      //performDetection();
     }
   }, [
     detections,
@@ -150,6 +150,23 @@ export default function WebcamDialog({ observer }: Props) {
     streaming,
     applyDetections,
   ]);
+
+  useEffect(() => {
+    if (observer) {
+      return;
+    }
+
+    if (streaming) {
+      const interval = setInterval(() => {
+        console.log("performing detection", Date.now());
+        performDetection();
+      }, 1000 / 12);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [observer, streaming, performDetection]);
 
   const startStreaming = () => {
     setStreaming(true);
@@ -190,7 +207,7 @@ export default function WebcamDialog({ observer }: Props) {
               ref={webcamRef}
               audio={false}
               mirrored={true}
-              screenshotFormat="image/jpeg"
+              screenshotFormat="image/webp"
               screenshotQuality={0.8}
               videoConstraints={videoConstraints}
             />

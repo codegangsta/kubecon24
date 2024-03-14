@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"image/jpeg"
 	"log"
 	"strings"
 
 	"github.com/LdDl/go-darknet"
 	"github.com/nats-io/nats.go/micro"
+	"golang.org/x/image/webp"
 )
 
 type DetectionResponse struct {
@@ -29,7 +29,7 @@ func detectionHandler() micro.Handler {
 			return
 		}
 		buffer := bytes.NewBuffer(imageBytes)
-		src, err := jpeg.Decode(buffer)
+		src, err := webp.Decode(buffer)
 		if err != nil {
 			log.Println("Error decoding image:", err)
 			req.Error("400", "Error decoding image", nil)
