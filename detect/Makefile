@@ -10,7 +10,7 @@ remote_run::
 	ssh jeremy@192.168.3.2 'cd /home/jeremy/code/kubecon24 && /usr/local/go/bin/go run .'
 
 ssh::
-	ssh jeremy@192.168.3.2
+	TERM=xterm ssh jeremy@192.168.3.2
 
 remote_sync::
 	rsync -avz --exclude-from '../.gitignore' --delete -e ssh ./ jeremy@192.168.3.2:/home/jeremy/code/kubecon24
