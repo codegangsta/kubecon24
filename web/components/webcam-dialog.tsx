@@ -87,7 +87,6 @@ export default function WebcamDialog({ observer }: Props) {
       if (connection && screenshotData) {
         // generate a short random alphanumeric string
         const randomString = Math.random().toString(36).substring(2, 15);
-        console.log(screenshotData);
 
         const resp = await connection
           .request("ai_detect", screenshotData, {
@@ -141,7 +140,7 @@ export default function WebcamDialog({ observer }: Props) {
       }
       return;
     } else if (streaming) {
-      //performDetection();
+      performDetection();
     }
   }, [
     detections,
@@ -153,6 +152,7 @@ export default function WebcamDialog({ observer }: Props) {
   ]);
 
   useEffect(() => {
+    return;
     if (observer) {
       return;
     }
