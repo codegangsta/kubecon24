@@ -70,9 +70,9 @@ export default function WebcamDialog({ observer }: Props) {
       return acc;
     }, [] as Detection[]);
 
-    if (data.Detections.length == 0) {
-      return;
-    }
+    // if (data.Detections.length == 0) {
+    //   return;
+    // }
 
     setDetections(data);
   }, []);
