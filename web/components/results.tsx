@@ -96,8 +96,7 @@ export default function Results({ nickname }: Props) {
     }
 
     log(
-      `Connected to ${
-        connection.info?.server_name
+      `Connected to ${connection.info?.server_name
       } (${connection.getServer()}) as "${nickname}"`
     );
 
@@ -146,7 +145,7 @@ export default function Results({ nickname }: Props) {
     const service = (async () => {
       const service = await connection.services.add({
         name: "kubecon",
-        description: "Kubecon Attendee Service",
+        description: "Attendee Service",
         version: "0.0.1",
         statsHandler: (stats) => {
           return Promise.resolve({

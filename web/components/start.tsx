@@ -42,7 +42,7 @@ export default function Start(props: Props) {
     <div className="flex flex-grow items-center justify-center">
       <Card className="max-w-sm">
         <CardHeader>
-          <CardTitle>NATS Kubecon 2023 Demo</CardTitle>
+          <CardTitle>NATS AI Demo</CardTitle>
           <CardDescription>
             To kick off the demo, let&apos;s start with a nickname
           </CardDescription>
